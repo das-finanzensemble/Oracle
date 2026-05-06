@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle – Strategischer Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple-deep: #1a1535;
+    --purple-mid: #2e2660;
+    --purple-accent: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-pale: #f5f4ff;
+    --gold: #c9a84c;
+    --gold-light: #f0e6c8;
+    --text-main: #1a1535;
+    --text-muted: #6b6585;
+    --text-hint: #a09bba;
+    --border: rgba(83,74,183,0.15);
+    --bg: #faf9ff;
+    --card: #ffffff;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  /* Header */
+  .oracle-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .oracle-sigil {
+    width: 48px; height: 48px;
+    background: var(--purple-deep);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .oracle-sigil svg { width: 24px; height: 24px; fill: var(--gold); }
+  .oracle-title h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--purple-deep);
+    letter-spacing: 0.02em;
+  }
+  .oracle-title p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* API Key Banner */
+  #api-banner {
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.82rem;
+    color: #6b4f0a;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #api-banner.hidden { display: none; }
+  #api-banner input {
+    flex: 1;
+    border: 1px solid var(--gold);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    background: white;
+    color: var(--text-main);
+    font-family: 'DM Sans', sans-serif;
+  }
+  #api-banner button {
+    background: var(--purple-deep);
+    color: var(--gold);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+
+  /* Topic chips */
+  .topic-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .chip {
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: var(--card);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .chip:hover { border-color: var(--purple-accent); color: var(--purple-accent); }
+  .chip.active { background: var(--purple-deep); color: var(--gold); border-color: var(--purple-deep); }
+
+  /* Input */
+  .input-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--purple-accent); }
+  textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 1rem 1.25rem 0.75rem;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    resize: none;
+    min-height: 100px;
+    background: transparent;
+    line-height: 1.6;
+  }
+  textarea::placeholder { color: var(--text-hint); }
+  .input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border);
+    background: #faf9ff;
+  }
+  .input-hint { font-size: 0.75rem; color: var(--text-hint); }
+  .send-btn {
+    background: var(--purple-deep);
+    color: var(--gold);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    transition: background 0.15s;
+  }
+  .send-btn:hover { background: var(--purple-mid); }
+  .send-btn:disabled { background: #d0cce8; color: #8f8aac; cursor: not-allowed; }
+  .send-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+  /* Response */
+  #response { display: none; }
+  .response-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .response-card-header {
+    background: var(--purple-deep);
+    padding: 0.75rem 1.25rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .response-card-header span {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.95rem;
+    color: var(--gold);
+    letter-spacing: 0.03em;
+  }
+  .response-card-header svg { width: 16px; height: 16px; fill: var(--gold); opacity: 0.7; }
+
+  /* Loading */
+  #loading {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 1.5rem 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .dots { display: flex; gap: 5px; }
+  .dots span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--purple-accent);
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,100% { opacity:0.2; } 50% { opacity:1; } }
+
+  /* Sections */
+  #sections { padding: 0 1.25rem 1.25rem; }
+  .section { margin-top: 1.25rem; }
+  .section:first-child { margin-top: 1rem; }
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--purple-accent);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-label svg { width: 12px; height: 12px; fill: var(--purple-accent); }
+  .section-content {
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: var(--text-main);
+  }
+  .section-content ul { padding-left: 1.2rem; margin: 4px 0; }
+  .section-content li { margin-bottom: 3px; }
+  .section-content strong { font-weight: 500; color: var(--purple-mid); }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0 0;
+  }
+
+  /* Disclaimer */
+  .disclaimer {
+    font-size: 0.72rem;
+    color: var(--text-hint);
+    text-align: center;
+    margin-top: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* Reset */
+  #reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: none;
+    margin-bottom: 1.5rem;
+  }
+  #reset-btn:hover { border-color: var(--purple-accent); color: var(--purple-accent); }
+</style>
+</head>
+<body>
+
+<div class="oracle-header">
+  <div class="oracle-sigil">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+  </div>
+  <div class="oracle-title">
+    <h1>Oracle</h1>
+    <p>Strategischer Navigator · Finanz & Vorsorge</p>
+  </div>
+</div>
+
+<!-- API Key Setup — einmalig eintragen, dann ausblenden -->
+<div id="api-banner">
+  <span>🔑 API-Key:</span>
+  <input type="password" id="api-key-input" placeholder="sk-ant-..." />
+  <button onclick="saveKey()">Speichern</button>
+</div>
+
+<button id="reset-btn" onclick="resetChat()">← Neue Frage</button>
+
+<div class="topic-row" id="topic-row">
+  <button class="chip" onclick="selectChip(this,'Altersvorsorge & Rente')">Altersvorsorge</button>
+  <button class="chip" onclick="selectChip(this,'Immobilien als Investment')">Immobilien</button>
+  <button class="chip" onclick="selectChip(this,'Investmentstrategien & ETFs')">Investments</button>
+  <button class="chip" onclick="selectChip(this,'Krankenversicherung & PKV')">Krankenversicherung</button>
+  <button class="chip" onclick="selectChip(this,'Steuern & Vermögensaufbau')">Steuern</button>
+  <button class="chip" onclick="selectChip(this,'Absicherung & Versicherungen')">Absicherung</button>
+  <button class="chip" onclick="selectChip(this,'Finanzierung & Kredit')">Finanzierung</button>
+</div>
+
+<div class="input-wrap" id="input-wrap">
+  <textarea id="user-input" placeholder="Beschreibe deine Situation – z.B. «Ich bin 38, angestellt, möchte eine Eigentumswohnung als Investment kaufen. Was muss ich beachten?»"></textarea>
+  <div class="input-footer">
+    <span class="input-hint">Strg+Enter zum Senden</span>
+    <button class="send-btn" id="send-btn" onclick="askOracle()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      Analysieren
+    </button>
+  </div>
+</div>
+
+<div id="response">
+  <div class="response-card">
+    <div class="response-card-header">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+      <span>Oracle – Strategische Einschätzung</span>
+    </div>
+    <div id="loading">
+      <div class="dots"><span></span><span></span><span></span></div>
+      Analyse läuft…
+    </div>
+    <div id="sections"></div>
+  </div>
+</div>
+
+<p class="disclaimer">Oracle ersetzt keine individuelle Rechts-, Steuer- oder Finanzberatung.<br>Einschätzungen sind allgemeiner Natur und dienen der Orientierung.</p>
+
+<script>
+const STORAGE_KEY = 'oracle_api_key';
+let selectedTopic = '';
+
+// Load saved key
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    document.getElementById('api-banner').classList.add('hidden');
+    document.getElementById('api-key-input').value = saved;
+  }
+});
+
+function saveKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-')) { alert('Bitte einen gültigen Anthropic API-Key eingeben (beginnt mit sk-ant-...).'); return; }
+  localStorage.setItem(STORAGE_KEY, val);
+  document.getElementById('api-banner').classList.add('hidden');
+}
+
+function getKey() {
+  return localStorage.getItem(STORAGE_KEY) || document.getElementById('api-key-input').value.trim();
+}
+
+function selectChip(el, topic) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedTopic = topic;
+}
+
+function resetChat() {
+  document.getElementById('response').style.display = 'none';
+  document.getElementById('input-wrap').style.display = 'block';
+  document.getElementById('topic-row').style.display = 'flex';
+  document.getElementById('reset-btn').style.display = 'none';
+  document.getElementById('user-input').value = '';
+  document.getElementById('sections').innerHTML = '';
+  selectedTopic = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+}
+
+function parseResponse(text) {
+  const keys = ['Einordnung','Relevante Faktoren','Optionen','Empfehlung','Offene Punkte'];
+  const icons = {
+    'Einordnung': '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 9H11V7h2v4zm0 4h-2v-2h2v2z"/></svg>',
+    'Relevante Faktoren': '<svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    'Optionen': '<svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+    'Empfehlung': '<svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>',
+    'Offene Punkte': '<svg viewBox="0 0 24 24"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7v2h2v-2h-2zm2-1.645A3.502 3.502 0 0 0 12 6.5a3.5 3.5 0 0 0-3.433 2.813l1.962.393A1.5 1.5 0 1 1 12 11.5a1 1 0 0 0-1 1V14h2v-.645z"/></svg>'
+  };
+  const regex = new RegExp(`###\\s*(${keys.join('|')})`, 'g');
+  const parts = text.split(regex).filter(s => s.trim());
+  const result = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (keys.includes(parts[i])) {
+      result.push({ key: parts[i], icon: icons[parts[i]] || '', content: parts[i+1] || '' });
+      i++;
+    }
+  }
+  return result.length ? result : [{ key: 'Analyse', icon: icons['Einordnung'], content: text }];
+}
+
+function renderSections(sections) {
+  const container = document.getElementById('sections');
+  container.innerHTML = '';
+  sections.forEach((s, idx) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+    const content = s.content
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^[-–]\s(.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>[\s\S]*?<\/li>)+/g, m => `<ul>${m}</ul>`)
+      .replace(/\n\n+/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    div.innerHTML = `
+      ${idx > 0 ? '<hr class="section-divider">' : ''}
+      <div class="section-label">${s.icon}${s.key}</div>
+      <div class="section-content"><p>${content}</p></div>`;
+    container.appendChild(div);
+  });
+}
+
+async function askOracle() {
+  const key = getKey();
+  if (!key || !key.startsWith('sk-')) {
+    document.getElementById('api-banner').classList.remove('hidden');
+    alert('Bitte zuerst den API-Key eintragen.');
+    return;
+  }
+  const q = document.getElementById('user-input').value.trim();
+  if (!q) return;
+
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('input-wrap').style.display = 'none';
+  document.getElementById('topic-row').style.display = 'none';
+  document.getElementById('response').style.display = 'block';
+  document.getElementById('reset-btn').style.display = 'inline-block';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('sections').innerHTML = '';
+
+  const system = `Du bist Oracle – ein strategischer Beratungsagent für Finanz-, Vorsorge-, Investment- und Versicherungsfragen im deutschsprachigen Raum. Du arbeitest präzise, ruhig und souverän. Kein Hype, keine Panikmache, keine leeren Floskeln.
+
+Antworte immer in dieser Struktur:
+
+### Einordnung
+Kurze Einordnung des Themas.
+
+### Relevante Faktoren
+Die wichtigsten Einflussgrößen, Risiken, Annahmen.
+
+### Optionen
+Realistische Handlungsoptionen mit Vor- und Nachteilen.
+
+### Empfehlung
+Eine klare, begründete Empfehlung oder Entscheidungslogik.
+
+### Offene Punkte
+Welche Informationen noch fehlen oder geprüft werden sollten.
+
+Trenne klar zwischen Fakten, Annahmen und Einschätzungen. Antworte ausschließlich auf Deutsch. Weise auf Prüfbedarf beim Steuerberater, Rechtsanwalt oder Finanzberater hin, wenn nötig.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-calls': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        system,
+        messages: [{ role: 'user', content: selectedTopic ? `Thema: ${selectedTopic}\n\n${q}` : q }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text||'').join('\n') || 'Keine Antwort erhalten.';
+    document.getElementById('loading').style.display = 'none';
+    renderSections(parseResponse(text));
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('sections').innerHTML = '<div class="section"><div class="section-content" style="color:#c0392b;">Verbindungsfehler. Bitte API-Key prüfen und erneut versuchen.</div></div>';
+  }
+  document.getElementById('send-btn').disabled = false;
+}
+
+document.getElementById('user-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) askOracle();
+});
+</script>
+</body>
+</html>
