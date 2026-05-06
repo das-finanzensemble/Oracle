@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -276,12 +277,8 @@
   </div>
 </div>
 
-<!-- API Key Setup — einmalig eintragen, dann ausblenden -->
-<div id="api-banner">
-  <span>🔑 API-Key:</span>
-  <input type="password" id="api-key-input" placeholder="sk-ant-..." />
-  <button onclick="saveKey()">Speichern</button>
-</div>
+<!-- API Key ist direkt eingetragen -->
+<div id="api-banner" class="hidden"></div>
 
 <button id="reset-btn" onclick="resetChat()">← Neue Frage</button>
 
@@ -323,28 +320,10 @@
 <p class="disclaimer">Oracle ersetzt keine individuelle Rechts-, Steuer- oder Finanzberatung.<br>Einschätzungen sind allgemeiner Natur und dienen der Orientierung.</p>
 
 <script>
-const STORAGE_KEY = 'oracle_api_key';
+// ⬇️ HIER deinen Anthropic API-Key eintragen (sk-ant-...)
+const API_KEY = 'sk-ant-api03-j_J...YwAA';
+
 let selectedTopic = '';
-
-// Load saved key
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    document.getElementById('api-banner').classList.add('hidden');
-    document.getElementById('api-key-input').value = saved;
-  }
-});
-
-function saveKey() {
-  const val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-')) { alert('Bitte einen gültigen Anthropic API-Key eingeben (beginnt mit sk-ant-...).'); return; }
-  localStorage.setItem(STORAGE_KEY, val);
-  document.getElementById('api-banner').classList.add('hidden');
-}
-
-function getKey() {
-  return localStorage.getItem(STORAGE_KEY) || document.getElementById('api-key-input').value.trim();
-}
 
 function selectChip(el, topic) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -405,10 +384,9 @@ function renderSections(sections) {
 }
 
 async function askOracle() {
-  const key = getKey();
-  if (!key || !key.startsWith('sk-')) {
-    document.getElementById('api-banner').classList.remove('hidden');
-    alert('Bitte zuerst den API-Key eintragen.');
+  const key = API_KEY;
+  if (!key || key === 'DEIN_API_KEY_HIER') {
+    alert('Bitte den API-Key in der index.html eintragen (Zeile: const API_KEY = ...)');
     return;
   }
   const q = document.getElementById('user-input').value.trim();
