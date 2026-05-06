@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -321,7 +320,7 @@
 
 <script>
 // ⬇️ HIER deinen Anthropic API-Key eintragen (sk-ant-...)
-const API_KEY = 'sk-ant-api03-j_J...YwAA';
+const API_KEY = 'DEIN_API_KEY_HIER';
 
 let selectedTopic = '';
 
@@ -422,14 +421,10 @@ Welche Informationen noch fehlen oder geprüft werden sollten.
 Trenne klar zwischen Fakten, Annahmen und Einschätzungen. Antworte ausschließlich auf Deutsch. Weise auf Prüfbedarf beim Steuerberater, Rechtsanwalt oder Finanzberater hin, wenn nötig.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const PROXY_URL = 'https://hook.eu1.make.com/8rmwhat56kz8qx3wfx7w8brea5lj7mtp';
+    const res = await fetch(PROXY_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-calls': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1200,
